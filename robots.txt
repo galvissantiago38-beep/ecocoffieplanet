@@ -1,0 +1,6 @@
+# Permite que todos los buscadores (Google, Bing, etc.) indexen la página
+User-agent: *
+Allow: /
+
+# Mapa del sitio (cambia tiendamascotasventas-bot por tu usuario de GitHub cuando publiques)
+Sitemap: https://galvissantiago38-beep.github.io/ecocoffieplanet/sitemap.xml

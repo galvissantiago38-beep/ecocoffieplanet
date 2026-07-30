@@ -1,0 +1,21 @@
+CARPETA DE IMÁGENES · ECOCOFFIEPLANET
+=====================================
+
+Aquí puedes guardar tus propias imágenes (por ejemplo, la portada creada con IA).
+
+CÓMO PONER TU IMAGEN DE PORTADA (el rostro con exfoliante):
+1. Genera o descarga tu imagen.
+2. Guárdala en ESTA carpeta con un nombre sencillo, por ejemplo:  portada.jpg
+   (Evita espacios y tildes en el nombre. Sirven .jpg, .png o .webp)
+3. Abre el archivo  config.js  (está en la carpeta principal).
+4. Busca la línea que dice  heroImagen:  y déjala así:
+
+       heroImagen: "img/portada.jpg",
+
+5. Guarda y recarga la página (Ctrl + F5).
+
+CONSEJO: para que se vea nítida en pantallas grandes, usa una imagen
+horizontal de buena calidad (mínimo 1600 px de ancho).
+
+Puedes hacer lo mismo con cualquier otra imagen (productos, galería, secciones):
+guárdala aquí y en config.js escribe la ruta  "img/nombre-de-tu-foto.jpg".

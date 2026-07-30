@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<!--
+  ============================================================
+  ECOCOFFIEPLANET — Cosmética natural a base de cuncho de café
+  Página tipo "diapositivas": cada sección ocupa una pantalla.
+  Archivos: index.html · style.css · script.js · config.js
+  👉 Para cambiar PRECIOS e IMÁGENES edita solo "config.js".
+  ============================================================
+-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ECOCOFFIEPLANET — Cosmética natural colombiana elaborada con el cuncho del café. Exfoliantes y jabones naturales que cuidan tu piel y protegen el planeta." />
+  <meta name="keywords" content="cosmética natural, exfoliante de café, cuncho de café, skincare natural, jabón artesanal, Colombia, sostenible, cuidado de la piel, economía circular" />
+  <meta name="author" content="ECOCOFFIEPLANET" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#3f4a34" />
+  <title>ECOCOFFIEPLANET · Cosmética natural de café | Cuida tu piel, protege el planeta</title>
+
+  <!-- ====== SEO / Redes sociales ======
+       👉 Cuando publiques en GitHub Pages, reemplaza tiendamascotasventas-bot por tu usuario real
+          en las 3 direcciones de abajo (canonical, og:url).  Ejemplo de URL final:
+          https://tu-usuario.github.io/ecocoffieplanet/ -->
+  <link rel="canonical" href="https://galvissantiago38-beep.github.io/ecocoffieplanet/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="ECOCOFFIEPLANET" />
+  <meta property="og:locale" content="es_CO" />
+  <meta property="og:title" content="ECOCOFFIEPLANET · Cosmética natural de café" />
+  <meta property="og:description" content="Cosmética natural colombiana hecha con el cuncho del café. Cuida tu piel, protege el planeta." />
+  <meta property="og:url" content="https://galvissantiago38-beep.github.io/ecocoffieplanet/" />
+  <meta property="og:image" content="https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=1200&q=80" />
+  <meta property="og:image:alt" content="Cuidado natural de la piel con café" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ECOCOFFIEPLANET · Cosmética natural de café" />
+  <meta name="twitter:description" content="Cosmética natural colombiana hecha con el cuncho del café. Cuida tu piel, protege el planeta." />
+  <meta name="twitter:image" content="https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=1200&q=80" />
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- ===================== LOADER ===================== -->
+  <div id="loader" class="loader" aria-hidden="true">
+    <div class="loader__cup">
+      <svg viewBox="0 0 64 64" width="64" height="64" fill="none">
+        <path d="M32 6c0 10-8 14-8 24M32 6c0 10 8 14 8 24" stroke="currentColor" stroke-width="3"/>
+        <path d="M32 4c6-8 18-9 18-9s0 12-9 16c-4 2-9 1-9-7Z" fill="currentColor" opacity=".6"/>
+      </svg>
+    </div>
+    <span class="loader__brand">ECOCOFFIEPLANET</span>
+  </div>
+
+  <!-- ===================== NAVBAR ===================== -->
+  <header class="navbar" id="navbar">
+    <div class="container navbar__inner">
+      <a href="#inicio" class="logo" aria-label="Inicio ECOCOFFIEPLANET">
+        <svg class="logo__icon" viewBox="0 0 48 48" width="30" height="30" aria-hidden="true">
+          <ellipse cx="24" cy="27" rx="12" ry="16" fill="currentColor"/>
+          <path d="M24 13c0 8-5 11-5 18M24 13c0 8 5 11 5 18" stroke="#fff" stroke-width="2" fill="none"/>
+          <path d="M24 12c4-6 12-7 12-7s0 8-6 11c-3 1.5-6 .5-6-4Z" fill="#7d9666"/>
+        </svg>
+        <span class="logo__text">ECOCOFFIEPLANET</span>
+      </a>
+
+      <nav class="nav" id="nav-menu" aria-label="Navegación principal">
+        <a href="#historia" class="nav__link">Historia</a>
+        <a href="#por-que" class="nav__link">Café</a>
+        <a href="#productos" class="nav__link">Productos</a>
+        <a href="#proceso" class="nav__link">Proceso</a>
+        <a href="#contacto" class="nav__link nav__link--cta">Contacto</a>
+      </nav>
+
+      <div class="navbar__actions">
+        <button class="icon-btn" id="theme-toggle" aria-label="Cambiar tema" title="Modo oscuro / claro">
+          <svg class="icon-sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>
+          </svg>
+        </button>
+        <button class="hamburger" id="hamburger" aria-label="Abrir menú" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Puntos de navegación entre diapositivas (se generan en script.js) -->
+  <nav class="deck-nav" id="deck-nav" aria-label="Ir a diapositiva"></nav>
+
+  <!-- ===================== DECK (contenedor de diapositivas) ===================== -->
+  <main class="deck" id="deck">
+
+    <!-- ---------- 1. HERO / INICIO ---------- -->
+    <section class="slide hero" id="inicio" data-nav="Inicio">
+      <div class="hero__bg" id="hero-bg"></div>
+      <div class="hero__overlay"></div>
+      <div class="container hero__content">
+        <span class="hero__badge reveal">🌿 100% colombiano · Sostenible</span>
+        <!-- 👉 ESLOGAN: cambia este texto cuando quieras -->
+        <h1 class="hero__title reveal">Cuidándote, <span>cuidas el planeta.</span></h1>
+        <p class="hero__text reveal">
+          Reutilizamos el <strong>cuncho del café</strong> —ese residuo que suele terminar en la
+          basura— para crear cosmética natural, artesanal y sostenible. Belleza que cuida tu piel
+          y también al planeta.
+        </p>
+        <div class="hero__actions reveal">
+          <a href="#productos" class="btn btn--primary">Conoce nuestros productos</a>
+          <a href="#historia" class="btn btn--ghost">Nuestra historia</a>
+        </div>
+      </div>
+      <span class="hero__scroll" aria-hidden="true"><span></span></span>
+    </section>
+
+    <!-- ---------- 2. HISTORIA ---------- -->
+    <section class="slide" id="historia" data-nav="Historia">
+      <div class="container grid-2">
+        <div class="reveal">
+          <span class="eyebrow">Nuestra historia</span>
+          <h2 class="slide__title">De un residuo olvidado a un ritual de cuidado</h2>
+          <p class="lead">Nacimos observando algo cotidiano: la enorme cantidad de residuos de café que se generan cada día.</p>
+          <p>Donde muchos veían basura, nosotros vimos una oportunidad. El cuncho del café conserva texturas y antioxidantes valiosos. Así comenzamos a transformarlo en cosmética natural, aplicando la <strong>economía circular</strong>: reciclar, reaprovechar y devolverle valor a lo que ya existe.</p>
+          <ul class="check-list">
+            <li>Innovación con propósito real</li>
+            <li>Economía circular y reciclaje</li>
+            <li>Aprovechamiento responsable del café</li>
+          </ul>
+        </div>
+        <div class="reveal media-card"><img data-img="historia" alt="Granos de café" loading="lazy" /></div>
+      </div>
+    </section>
+
+    <!-- ---------- 3. INSPIRACIÓN ---------- -->
+    <section class="slide slide--tinted" id="inspiracion" data-nav="Inspiración">
+      <div class="container grid-2 grid-2--reverse">
+        <div class="reveal media-card"><img data-img="inspiracion" alt="Naturaleza colombiana" loading="lazy" /></div>
+        <div class="reveal">
+          <span class="eyebrow">Nuestra inspiración</span>
+          <h2 class="slide__title">Colombia, tierra de café</h2>
+          <p class="lead">Colombia es uno de los mayores productores de café del mundo, y ese orgullo corre por nuestras venas.</p>
+          <p>Pero cada taza deja tras de sí un residuo que casi siempre se desperdicia. Nos inspiramos en ese momento: convertir lo que sobra en algo útil, hermoso y bueno para las personas y para el planeta.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 4. MISIÓN Y VISIÓN ---------- -->
+    <section class="slide" id="mision-vision" data-nav="Misión y Visión">
+      <div class="container">
+        <div class="slide__head reveal">
+          <span class="eyebrow">Nuestro norte</span>
+          <h2 class="slide__title center">Misión &amp; Visión</h2>
+        </div>
+        <div class="mv-grid">
+          <article class="mv-card reveal">
+            <div class="mv-card__icon">
+              <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.6" fill="currentColor"/></svg>
+            </div>
+            <h3>Nuestra misión</h3>
+            <p>Crear productos naturales de alta calidad que cuiden la piel mientras reducimos el impacto ambiental, a través del aprovechamiento responsable del café.</p>
+          </article>
+          <article class="mv-card reveal">
+            <div class="mv-card__icon">
+              <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <h3>Nuestra visión</h3>
+            <p>Ser una empresa líder en cosmética sostenible en Colombia y, posteriormente, expandir nuestro modelo de economía circular a nivel internacional.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 5. VALORES ---------- -->
+    <section class="slide slide--tinted" id="valores" data-nav="Valores">
+      <div class="container">
+        <div class="slide__head reveal">
+          <span class="eyebrow">Lo que nos mueve</span>
+          <h2 class="slide__title center">Nuestros valores</h2>
+        </div>
+        <div class="values-grid">
+          <div class="value-card reveal"><span class="value-card__ico">🌱</span><h4>Sostenibilidad</h4></div>
+          <div class="value-card reveal"><span class="value-card__ico">💡</span><h4>Innovación</h4></div>
+          <div class="value-card reveal"><span class="value-card__ico">⭐</span><h4>Calidad</h4></div>
+          <div class="value-card reveal"><span class="value-card__ico">🤝</span><h4>Responsabilidad</h4></div>
+          <div class="value-card reveal"><span class="value-card__ico">💬</span><h4>Honestidad</h4></div>
+          <div class="value-card reveal"><span class="value-card__ico">🇨🇴</span><h4>Amor por Colombia</h4></div>
+          <div class="value-card reveal"><span class="value-card__ico">🌍</span><h4>Protección del planeta</h4></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 6. ¿POR QUÉ EL CAFÉ? ---------- -->
+    <section class="slide" id="por-que" data-nav="¿Por qué el café?">
+      <div class="container grid-2">
+        <div class="reveal media-card media-card--tall"><img data-img="porque" alt="Cuncho de café" loading="lazy" /></div>
+        <div class="reveal">
+          <span class="eyebrow">La ciencia detrás</span>
+          <h2 class="slide__title">¿Por qué el café?</h2>
+          <p class="lead">Su textura y sus compuestos naturales lo hacen un gran aliado para el cuidado de la piel.</p>
+          <ul class="benefit-list">
+            <li><b>Exfoliación natural.</b> Sus partículas limpian suavemente la piel.</li>
+            <li><b>Remoción de células muertas.</b> Favorece una piel más lisa y renovada.</li>
+            <li><b>Mejora la textura.</b> Deja una sensación suave al tacto.</li>
+            <li><b>Antioxidantes naturales.</b> El café aporta compuestos antioxidantes.</li>
+            <li><b>Apariencia más saludable.</b> Una piel cuidada luce más luminosa.</li>
+          </ul>
+          <p class="fineprint">*Productos cosméticos de cuidado natural. No reemplazan tratamientos médicos.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 7. BENEFICIOS ---------- -->
+    <section class="slide slide--tinted" id="beneficios" data-nav="Beneficios">
+      <div class="container">
+        <div class="slide__head reveal">
+          <span class="eyebrow">Buenos por dentro y por fuera</span>
+          <h2 class="slide__title center">Beneficios</h2>
+        </div>
+        <div class="benefits-grid">
+          <div class="benefit-card reveal"><span>🌿</span><h4>Ingredientes naturales</h4></div>
+          <div class="benefit-card reveal"><span>♻️</span><h4>Producto sostenible</h4></div>
+          <div class="benefit-card reveal"><span>☕</span><h4>Aprovechamiento del café</h4></div>
+          <div class="benefit-card reveal"><span>💚</span><h4>Libre de químicos agresivos</h4></div>
+          <div class="benefit-card reveal"><span>🐰</span><h4>No testeado en animales</h4></div>
+          <div class="benefit-card reveal"><span>🇨🇴</span><h4>Hecho en Colombia</h4></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 8. PRODUCTOS (se generan desde config.js) ---------- -->
+    <section class="slide" id="productos" data-nav="Productos">
+      <div class="container">
+        <div class="slide__head reveal">
+          <span class="eyebrow">Nuestra colección</span>
+          <h2 class="slide__title center">Productos</h2>
+          <p class="slide__subtitle">Cosmética artesanal a base de cuncho de café, hecha en pequeños lotes.</p>
+        </div>
+        <div class="products-grid" id="products-grid"><!-- generado por JavaScript --></div>
+      </div>
+    </section>
+
+    <!-- ---------- 9. PROCESO ---------- -->
+    <section class="slide slide--tinted" id="proceso" data-nav="Proceso">
+      <div class="container">
+        <div class="slide__head reveal">
+          <span class="eyebrow">Del cuncho a tu piel</span>
+          <h2 class="slide__title center">¿Cómo elaboramos nuestros productos?</h2>
+        </div>
+        <ol class="steps">
+          <li class="step reveal"><span class="step__num">1</span><h4>Recolección</h4><p>Recogemos el cuncho de aliados locales.</p></li>
+          <li class="step reveal"><span class="step__num">2</span><h4>Selección</h4><p>Escogemos el mejor material.</p></li>
+          <li class="step reveal"><span class="step__num">3</span><h4>Secado</h4><p>Conservamos sus propiedades.</p></li>
+          <li class="step reveal"><span class="step__num">4</span><h4>Procesamiento</h4><p>Refinamos la textura ideal.</p></li>
+          <li class="step reveal"><span class="step__num">5</span><h4>Mezcla natural</h4><p>Con ingredientes seleccionados.</p></li>
+          <li class="step reveal"><span class="step__num">6</span><h4>Artesanal</h4><p>En pequeños lotes, con detalle.</p></li>
+          <li class="step reveal"><span class="step__num">7</span><h4>Control de calidad</h4><p>Revisamos cada lote.</p></li>
+          <li class="step reveal"><span class="step__num">8</span><h4>Empaque ecológico</h4><p>Empaques reciclables.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ---------- 10. COMPROMISO AMBIENTAL (contadores) ---------- -->
+    <section class="slide" id="compromiso" data-nav="Compromiso">
+      <div class="container grid-2 grid-2--center">
+        <div class="reveal">
+          <span class="eyebrow">Economía circular</span>
+          <h2 class="slide__title">Nuestro compromiso ambiental</h2>
+          <p class="lead">Cada producto es un acto de cuidado por el planeta.</p>
+          <ul class="check-list">
+            <li>Reducimos residuos de café que terminarían en la basura</li>
+            <li>Fomentamos el reciclaje y la economía circular</li>
+            <li>Disminuimos el impacto ambiental de la producción</li>
+            <li>Usamos empaques reciclables y responsables</li>
+          </ul>
+        </div>
+        <div class="stats-grid reveal">
+          <div class="stat-box"><strong class="counter" data-count="12000" data-prefix="+" data-suffix=" kg">0</strong><span>Residuos de café reutilizados</span></div>
+          <div class="stat-box"><strong class="counter" data-count="4500" data-prefix="+">0</strong><span>Clientes satisfechos</span></div>
+          <div class="stat-box"><strong class="counter" data-count="95" data-suffix="%">0</strong><span>Materiales reciclables</span></div>
+          <div class="stat-box"><strong class="counter" data-count="100" data-suffix="%">0</strong><span>Producción colombiana</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 11. TESTIMONIOS (carrusel) ---------- -->
+    <section class="slide slide--tinted" id="testimonios" data-nav="Testimonios">
+      <div class="container">
+        <div class="slide__head reveal">
+          <span class="eyebrow">Historias reales</span>
+          <h2 class="slide__title center">Lo que dicen nuestros clientes</h2>
+        </div>
+        <div class="carousel reveal" id="carousel">
+          <div class="carousel__track" id="carousel-track">
+            <figure class="testimonial">
+              <div class="testimonial__stars">★★★★★</div>
+              <blockquote>“Mi piel se siente mucho más suave desde la primera semana. Además, me encanta ayudar al planeta.”</blockquote>
+              <figcaption><strong>María Gómez</strong><span>Bogotá</span></figcaption>
+            </figure>
+            <figure class="testimonial">
+              <div class="testimonial__stars">★★★★★</div>
+              <blockquote>“Excelente aroma y excelente calidad. Se nota que es un producto hecho con dedicación.”</blockquote>
+              <figcaption><strong>Carlos Herrera</strong><span>Medellín</span></figcaption>
+            </figure>
+            <figure class="testimonial">
+              <div class="testimonial__stars">★★★★★</div>
+              <blockquote>“El exfoliante facial es mi favorito. Me deja la piel fresca y luminosa.”</blockquote>
+              <figcaption><strong>Valentina Ríos</strong><span>Cali</span></figcaption>
+            </figure>
+            <figure class="testimonial">
+              <div class="testimonial__stars">★★★★★</div>
+              <blockquote>“Me encanta la idea de reutilizar el café. Compro tranquila y mi piel lo agradece.”</blockquote>
+              <figcaption><strong>Andrés Peña</strong><span>Bucaramanga</span></figcaption>
+            </figure>
+          </div>
+          <button class="carousel__btn carousel__btn--prev" id="carousel-prev" aria-label="Anterior">‹</button>
+          <button class="carousel__btn carousel__btn--next" id="carousel-next" aria-label="Siguiente">›</button>
+          <div class="carousel__dots" id="carousel-dots"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 12. FAQ (acordeón) ---------- -->
+    <section class="slide" id="faq" data-nav="Preguntas">
+      <div class="container container--narrow">
+        <div class="slide__head reveal">
+          <span class="eyebrow">Resolvemos tus dudas</span>
+          <h2 class="slide__title center">Preguntas frecuentes</h2>
+        </div>
+        <div class="accordion">
+          <div class="accordion__item reveal">
+            <button class="accordion__head">¿Los productos son naturales?<span class="accordion__ico">+</span></button>
+            <div class="accordion__panel"><p>Sí. Se elaboran con cuncho de café e ingredientes naturales seleccionados, evitando químicos agresivos.</p></div>
+          </div>
+          <div class="accordion__item reveal">
+            <button class="accordion__head">¿Son aptos para todo tipo de piel?<span class="accordion__ico">+</span></button>
+            <div class="accordion__panel"><p>Están formulados para pieles normales y mixtas. Si tienes piel muy sensible, prueba en una zona pequeña antes del primer uso.</p></div>
+          </div>
+          <div class="accordion__item reveal">
+            <button class="accordion__head">¿Cómo debo utilizarlos?<span class="accordion__ico">+</span></button>
+            <div class="accordion__panel"><p>Aplica sobre la piel húmeda con movimientos circulares suaves, deja actuar unos segundos y enjuaga. Úsalo 2 o 3 veces por semana.</p></div>
+          </div>
+          <div class="accordion__item reveal">
+            <button class="accordion__head">¿Los empaques son reciclables?<span class="accordion__ico">+</span></button>
+            <div class="accordion__panel"><p>Sí. El 95% de nuestros materiales de empaque son reciclables y trabajamos para llegar al 100%.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 13. GALERÍA (se genera desde config.js) ---------- -->
+    <section class="slide slide--tinted" id="galeria" data-nav="Galería">
+      <div class="container">
+        <div class="slide__head reveal">
+          <span class="eyebrow">Inspiración natural</span>
+          <h2 class="slide__title center">Galería</h2>
+        </div>
+        <div class="gallery" id="gallery-grid"><!-- generado por JavaScript --></div>
+      </div>
+    </section>
+
+    <!-- ---------- 14. CONTACTO ---------- -->
+    <section class="slide" id="contacto" data-nav="Contacto">
+      <div class="container">
+        <div class="slide__head reveal">
+          <span class="eyebrow">Hablemos</span>
+          <h2 class="slide__title center">Contáctanos</h2>
+        </div>
+        <div class="contact-grid">
+          <form class="contact-form reveal" id="contact-form" novalidate>
+            <div class="field"><label for="name">Nombre</label><input type="text" id="name" name="name" placeholder="Tu nombre" required /></div>
+            <div class="field"><label for="email">Correo</label><input type="email" id="email" name="email" placeholder="tucorreo@ejemplo.com" required /></div>
+            <div class="field"><label for="message">Mensaje</label><textarea id="message" name="message" rows="4" placeholder="Cuéntanos en qué podemos ayudarte" required></textarea></div>
+            <button type="submit" class="btn btn--primary btn--block">Enviar mensaje</button>
+            <p class="form-status" id="form-status" role="status"></p>
+          </form>
+          <aside class="contact-info reveal">
+            <h3>Información</h3>
+            <ul class="contact-list">
+              <li><span class="contact-ico">✉️</span><div><b>Correo</b><a href="mailto:hola@ecocoffieplanet.com">hola@ecocoffieplanet.com</a></div></li>
+              <li><span class="contact-ico">💬</span><div><b>WhatsApp</b><a href="https://wa.me/573000000000" target="_blank" rel="noopener">+57 300 000 0000</a></div></li>
+              <li><span class="contact-ico">📸</span><div><b>Instagram</b><a href="#">@ecocoffieplanet</a></div></li>
+              <li><span class="contact-ico">👍</span><div><b>Facebook</b><a href="#">ECOCOFFIEPLANET</a></div></li>
+              <li><span class="contact-ico">📍</span><div><b>Ubicación</b><span>Colombia</span></div></li>
+            </ul>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- FOOTER (última diapositiva) ---------- -->
+    <footer class="slide slide--footer footer" id="footer" data-nav="Cierre">
+      <div class="container">
+        <div class="footer__grid">
+          <div class="footer__col">
+            <span class="logo logo--light">
+              <svg class="logo__icon" viewBox="0 0 48 48" width="28" height="28" aria-hidden="true">
+                <ellipse cx="24" cy="27" rx="12" ry="16" fill="currentColor"/>
+                <path d="M24 13c0 8-5 11-5 18M24 13c0 8 5 11 5 18" stroke="#26301c" stroke-width="2" fill="none"/>
+                <path d="M24 12c4-6 12-7 12-7s0 8-6 11c-3 1.5-6 .5-6-4Z" fill="#a9c294"/>
+              </svg>
+              <span class="logo__text">ECOCOFFIEPLANET</span>
+            </span>
+            <p class="footer__about">Cosmética natural colombiana elaborada con el cuncho del café. Belleza que cuida tu piel y al planeta.</p>
+          </div>
+          <div class="footer__col">
+            <h4>Enlaces</h4>
+            <ul>
+              <li><a href="#historia">Historia</a></li>
+              <li><a href="#productos">Productos</a></li>
+              <li><a href="#proceso">Proceso</a></li>
+              <li><a href="#contacto">Contacto</a></li>
+            </ul>
+          </div>
+          <div class="footer__col">
+            <h4>Legal</h4>
+            <ul>
+              <li><a href="#">Política de privacidad</a></li>
+              <li><a href="#">Términos y condiciones</a></li>
+            </ul>
+          </div>
+          <div class="footer__col">
+            <h4>Síguenos</h4>
+            <div class="socials">
+              <a href="#" aria-label="Instagram" class="social"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+              <a href="#" aria-label="Facebook" class="social"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M13 22v-8h3l.5-3H13V9c0-1 .3-1.5 1.7-1.5H17V5s-1.4-.2-2.7-.2C11.6 4.8 10 6.3 10 9v2H7v3h3v8h3Z"/></svg></a>
+              <a href="https://wa.me/573000000000" aria-label="WhatsApp" class="social"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.4A10 10 0 1 0 12 2Zm5.3 14c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .3-3.3-.7-2.8-1.2-4.5-4-4.7-4.2-.1-.2-1-1.4-1-2.6 0-1.3.7-1.9 1-2.1.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6c-.2.2-.3.4-.1.7.2.3.9 1.4 1.9 2.3 1.3 1.1 2.3 1.4 2.6 1.6.2.1.4.1.6-.1l.7-.9c.2-.3.4-.2.6-.1l1.9.9c.3.1.4.2.5.3.1.3.1.7-.1 1.4Z"/></svg></a>
+            </div>
+          </div>
+        </div>
+        <div class="footer__bottom">
+          <p>© <span id="year"></span> ECOCOFFIEPLANET · Todos los derechos reservados.</p>
+          <p>Hecho con 🌿 en Colombia</p>
+        </div>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- Botón "diapositiva siguiente" (se oculta en la última) -->
+  <button id="next-slide" class="next-slide" aria-label="Siguiente diapositiva">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+  </button>
+
+  <!-- Botón volver arriba -->
+  <button id="to-top" class="to-top" aria-label="Volver al inicio" title="Volver al inicio">↑</button>
+
+  <!-- Primero la configuración, luego el script principal -->
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
