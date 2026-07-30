@@ -32,26 +32,143 @@ document.addEventListener('DOMContentLoaded', () => {
     if (CONFIG.imagenes && CONFIG.imagenes[clave]) img.src = CONFIG.imagenes[clave];
   });
 
-  // Generar tarjetas de PRODUCTOS
+  // Observador para animar los elementos al aparecer (se usa también aquí abajo)
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  // ===================== PRODUCTOS + REACCIONES =====================
   const productsGrid = document.getElementById('products-grid');
-  if (productsGrid && Array.isArray(CONFIG.productos)) {
-    productsGrid.innerHTML = CONFIG.productos.map(p => `
-      <article class="product-card reveal">
-        <div class="product-card__img">
-          <img src="${p.imagen}" alt="${p.nombre}" loading="lazy" />
-          ${p.etiqueta ? `<span class="product-card__tag">${p.etiqueta}</span>` : ''}
+
+  // Identificador anónimo del visitante (para "una reacción por persona", sin registro)
+  const getClienteId = () => {
+    let id = localStorage.getItem('eco-cliente-id');
+    if (!id) {
+      id = 'c_' + (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.round(Math.random() * 1e9));
+      localStorage.setItem('eco-cliente-id', id);
+    }
+    return id;
+  };
+  const clienteId = getClienteId();
+
+  // Plantilla de tarjeta. "conReacciones" añade los botones 👍 ❤️ 👎
+  const cardHTML = (p, conReacciones) => `
+    <article class="product-card reveal" data-product="${p.id || ''}">
+      <div class="product-card__img">
+        <img src="${p.imagen}" alt="${p.nombre}" loading="lazy" />
+        ${p.etiqueta ? `<span class="product-card__tag">${p.etiqueta}</span>` : ''}
+      </div>
+      <div class="product-card__body">
+        <h3>${p.nombre}</h3>
+        <p>${p.descripcion || ''}</p>
+        <div class="product-card__foot">
+          <span class="price">${formatPrice(p.precio)}</span>
+          <button class="btn btn--sm btn--primary">Ver más</button>
         </div>
-        <div class="product-card__body">
-          <h3>${p.nombre}</h3>
-          <p>${p.descripcion}</p>
-          <div class="product-card__foot">
-            <span class="price">${formatPrice(p.precio)}</span>
-            <button class="btn btn--sm btn--primary">Ver más</button>
-          </div>
-        </div>
-      </article>
-    `).join('');
-  }
+        ${conReacciones ? `
+        <div class="reactions" data-product="${p.id}">
+          <button class="reaction" data-tipo="like"    aria-label="Me gusta"><span>👍</span><b class="rc like">0</b></button>
+          <button class="reaction" data-tipo="love"    aria-label="Me encanta"><span>❤️</span><b class="rc love">0</b></button>
+          <button class="reaction" data-tipo="dislike" aria-label="No me gusta"><span>👎</span><b class="rc dislike">0</b></button>
+        </div>` : ''}
+      </div>
+    </article>`;
+
+  // Pinta los números de reacciones en cada tarjeta
+  const pintarConteos = (map) => {
+    document.querySelectorAll('.reactions').forEach(bar => {
+      const c = map[bar.dataset.product] || {};
+      bar.querySelector('.rc.like').textContent = c.like || 0;
+      bar.querySelector('.rc.love').textContent = c.love || 0;
+      bar.querySelector('.rc.dislike').textContent = c.dislike || 0;
+    });
+  };
+
+  // Trae los conteos desde la base de datos
+  const cargarConteos = async () => {
+    if (!window.sb) return;
+    const { data, error } = await window.sb.rpc('conteo_reacciones');
+    if (error) { console.warn('Conteos:', error.message); return; }
+    const map = {};
+    (data || []).forEach(r => { map[r.producto_id] = { like: r.likes, love: r.loves, dislike: r.dislikes }; });
+    pintarConteos(map);
+  };
+
+  // Marca cuál reacción eligió este visitante
+  const cargarMiReaccion = async () => {
+    if (!window.sb) return;
+    const { data } = await window.sb.from('reacciones').select('producto_id,tipo').eq('cliente_id', clienteId);
+    document.querySelectorAll('.reaction').forEach(b => b.classList.remove('active'));
+    (data || []).forEach(r => {
+      const btn = document.querySelector(`.reactions[data-product="${r.producto_id}"] .reaction[data-tipo="${r.tipo}"]`);
+      if (btn) btn.classList.add('active');
+    });
+  };
+
+  // Clic en un botón de reacción
+  const onReaccion = async (btn) => {
+    if (!window.sb) return;
+    const bar = btn.closest('.reactions');
+    const producto_id = bar.dataset.product;
+    const tipo = btn.dataset.tipo;
+    const yaActiva = btn.classList.contains('active');
+
+    // animación "pop"
+    btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop');
+
+    // respuesta visual inmediata
+    bar.querySelectorAll('.reaction').forEach(b => b.classList.remove('active'));
+    if (!yaActiva) btn.classList.add('active');
+
+    try {
+      if (yaActiva) {
+        // clic en la misma reacción → se quita
+        await window.sb.from('reacciones').delete().eq('producto_id', producto_id).eq('cliente_id', clienteId);
+      } else {
+        // nueva reacción o cambio → se guarda/actualiza (upsert por la clave única)
+        await window.sb.from('reacciones').upsert(
+          { producto_id, cliente_id: clienteId, tipo },
+          { onConflict: 'producto_id,cliente_id' }
+        );
+      }
+    } catch (e) { console.warn('Reacción:', e.message); }
+    cargarConteos();
+  };
+
+  // Dibuja los productos: desde Supabase si está configurado; si no, desde config.js
+  const initProductos = async () => {
+    if (!productsGrid) return;
+    let productos = null;
+    if (window.sb) {
+      const { data, error } = await window.sb.from('productos').select('*').order('creado_en', { ascending: true });
+      if (!error && data && data.length) productos = data;
+    }
+    const conReacciones = !!productos;             // solo hay reacciones si vienen de la base de datos
+    if (!productos) productos = CONFIG.productos;   // respaldo: nada se rompe sin Supabase
+
+    productsGrid.innerHTML = productos.map(p => cardHTML(p, conReacciones)).join('');
+    productsGrid.querySelectorAll('.reveal').forEach((el, i) => {
+      el.style.setProperty('--d', `${i * 0.07}s`);
+      revealObserver.observe(el);
+    });
+
+    if (conReacciones) {
+      productsGrid.querySelectorAll('.reaction').forEach(btn =>
+        btn.addEventListener('click', () => onReaccion(btn)));
+      await cargarConteos();
+      await cargarMiReaccion();
+      // Tiempo real: si otra persona reacciona, los números se actualizan solos
+      window.sb.channel('reacciones-web')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'reacciones' }, () => cargarConteos())
+        .subscribe();
+    }
+  };
+  initProductos();
 
   // Generar GALERÍA
   const galleryGrid = document.getElementById('gallery-grid');
@@ -172,14 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
   /* --------------------------------------------------------
      7. REVEAL + CONTADORES
      -------------------------------------------------------- */
-  const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('is-visible');
-        revealObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  // (el observador "revealObserver" se definió arriba, en la sección de productos)
   document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
   // Aparición escalonada de tarjetas dentro de las grillas

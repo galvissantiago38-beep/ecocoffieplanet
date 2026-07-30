@@ -432,3 +432,71 @@ ul { list-style: none; }
   .footer__grid { grid-template-columns: 1fr; }
   .footer__bottom { flex-direction: column; text-align: center; }
 }
+
+/* ============================================================
+   13. REACCIONES (botones 👍 ❤️ 👎 en las tarjetas de producto)
+   ============================================================ */
+.reactions {
+  display: flex; gap: .45rem; margin-top: 1rem; padding-top: .9rem;
+  border-top: 1px solid var(--border);
+}
+.reaction {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: .35rem;
+  padding: .45rem .3rem; border: 1.5px solid var(--border); border-radius: 100px;
+  background: var(--bg); cursor: pointer; color: var(--text-soft);
+  font-family: var(--font-head); font-size: .85rem;
+  transition: transform .2s var(--ease), border-color .2s, background .2s, color .2s;
+}
+.reaction span { font-size: 1.05rem; line-height: 1; }
+.reaction .rc { font-weight: 700; font-size: .82rem; }
+.reaction:hover { border-color: var(--accent); transform: translateY(-2px); }
+.reaction.active { background: color-mix(in srgb, var(--accent) 16%, transparent); border-color: var(--accent); color: var(--heading); }
+.reaction.pop { animation: pop .35s var(--ease); }
+@keyframes pop { 40% { transform: scale(1.28); } }
+
+/* ============================================================
+   14. PANEL DE ADMINISTRADOR (admin.html)
+   ============================================================ */
+.admin { background: var(--bg-tint); min-height: 100vh; }
+.admin-wrap { width: min(100% - 2rem, 1040px); margin: 2rem auto; }
+.admin-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 2rem; }
+
+/* Pantalla de login */
+.admin-login { min-height: 100vh; display: grid; place-items: center; padding: 1.5rem; }
+.admin-login .admin-card { width: min(100% - 2rem, 420px); }
+.admin-login h1 { font-size: 1.5rem; margin-bottom: .3rem; text-align: center; }
+.admin-login p.sub { text-align: center; color: var(--text-soft); margin-bottom: 1.6rem; font-size: .92rem; }
+.admin-login .logo { justify-content: center; margin-bottom: 1.2rem; }
+
+/* Cabecera del panel */
+.admin-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.admin-top h1 { font-size: 1.4rem; }
+.admin-top .who { font-size: .85rem; color: var(--text-soft); }
+
+/* Formulario de producto */
+.admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.admin-grid .full { grid-column: 1 / -1; }
+.msg { margin-top: .8rem; font-size: .9rem; min-height: 1.1rem; font-weight: 500; }
+.msg.ok { color: var(--accent); }
+.msg.err { color: #d9534f; }
+
+/* Tabla de productos */
+.admin-tools { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.admin-table-wrap { overflow-x: auto; }
+.admin-table { width: 100%; border-collapse: collapse; min-width: 640px; }
+.admin-table th, .admin-table td { padding: .7rem .6rem; border-bottom: 1px solid var(--border); text-align: left; font-size: .9rem; vertical-align: middle; }
+.admin-table th { font-family: var(--font-head); color: var(--heading); font-weight: 600; }
+.admin-thumb { width: 46px; height: 46px; border-radius: 10px; object-fit: cover; }
+.rcount { display: inline-flex; gap: .25rem; align-items: center; margin-right: .6rem; font-size: .85rem; color: var(--text-soft); white-space: nowrap; }
+.rcount b { color: var(--heading); }
+.admin-row-actions { display: flex; gap: .4rem; }
+.btn-icon { border: 1.5px solid var(--border); background: var(--bg); border-radius: 8px; padding: .35rem .6rem; cursor: pointer; font-size: .82rem; color: var(--heading); transition: background .2s, border-color .2s; }
+.btn-icon:hover { border-color: var(--accent); }
+.btn-icon.danger:hover { border-color: #d9534f; color: #d9534f; }
+
+.field-file { font-size: .85rem; }
+.admin-back { display: inline-block; margin-top: 1.2rem; font-size: .9rem; color: var(--accent); }
+
+@media (max-width: 640px) {
+  .admin-grid { grid-template-columns: 1fr; }
+}
