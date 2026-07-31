@@ -35,12 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
   let productos = [];
   let editId = null;
 
-  // Si falta configuración, avisamos
-  if (!window.supabase || !SB_URL || SB_URL.includes('TU-PROYECTO')) {
-    loginMsg.textContent = '⚠️ Falta configurar Supabase en supabase-config.js';
-    loginMsg.className = 'msg err';
-    loginForm.querySelector('button').disabled = true;
-    return;
+  // Muestra en pantalla cualquier error inesperado (para no quedar "en blanco")
+  const showFatal = (m) => { loginMsg.textContent = '⚠️ ' + m; loginMsg.className = 'msg err'; };
+  window.addEventListener('error', (e) => showFatal(e.message || 'Error de carga'));
+  window.addEventListener('unhandledrejection', (e) => showFatal((e.reason && e.reason.message) || 'Error de conexión'));
+
+  // Aviso si faltara la configuración (sin bloquear el botón)
+  if (!SB_URL || SB_URL.includes('TU-PROYECTO')) {
+    showFatal('Falta configurar Supabase en supabase-config.js');
   }
 
   /* -------------------- AUTENTICACIÓN (conexión directa) -------------------- */
@@ -54,11 +56,13 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.removeItem('eco-admin-email');
   };
 
-  // Crea un cliente que envía el token del admin en cada petición
-  const clienteConToken = (token) => window.supabase.createClient(SB_URL, SB_KEY, {
-    global: { headers: { Authorization: 'Bearer ' + token } },
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  // Crea un cliente que envía el token del admin en cada petición.
+  // Usa la opción "accessToken" (modo recomendado): evita el bloqueo interno
+  // de la librería y garantiza que el token viaje en todas las peticiones.
+  const clienteConToken = (token) => {
+    if (!window.supabase) throw new Error('No cargó la librería de Supabase (revisa tu internet o desactiva el bloqueador de anuncios).');
+    return window.supabase.createClient(SB_URL, SB_KEY, { accessToken: async () => token });
+  };
 
   // Login directo contra el servidor de autenticación (con tiempo límite)
   const iniciarSesion = async (email, password) => {
