@@ -67,6 +67,9 @@
 /* ------------------ 2. RESET Y BASE ------------------ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* El atributo "hidden" siempre debe ocultar (aunque haya display en el CSS) */
+[hidden] { display: none !important; }
+
 html {
   scroll-behavior: smooth;
   scroll-padding-top: var(--nav-h);
