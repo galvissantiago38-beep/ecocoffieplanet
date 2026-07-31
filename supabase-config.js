@@ -13,8 +13,8 @@
    normal con los productos de config.js (sin reacciones).
    ============================================================ */
 
-const SUPABASE_URL = "https://TU-PROYECTO.supabase.co";
-const SUPABASE_ANON_KEY = "TU-LLAVE-PUBLICA-ANON";
+const SUPABASE_URL = "https://psytkytuajrxtizynydf.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_fgkruuGxn-lB7Hm_z4EOzg_-J-Qr15F";
 
 // Crea el cliente global "sb". Si aún no está configurado o la
 // librería no cargó, queda en null y la web usa el modo básico.
