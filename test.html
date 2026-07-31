@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Diagnóstico · ECOCOFFIEPLANET</title>
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 24px; font-size: 18px; background:#faf8f3; color:#333; }
+    h1 { font-size: 22px; }
+    #out p { margin: 8px 0; padding: 10px 14px; background:#fff; border:1px solid #e7e1d4; border-radius:10px; }
+    .ok { color: #2e7d32; } .bad { color: #c62828; }
+  </style>
+</head>
+<body>
+  <h1>🔎 Diagnóstico ECOCOFFIEPLANET</h1>
+  <div id="out">⏳ Si SOLO ves este texto y nada más aparece abajo, significa que el JavaScript está BLOQUEADO en tu navegador (extensión, antivirus o configuración).</div>
+
+  <!-- Librería de Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Esta página se ejecuta sola y muestra los resultados en pantalla.
+    var out = document.getElementById('out');
+    out.innerHTML = '';
+    function log(msg, cls){ out.innerHTML += '<p class="' + (cls||'') + '">' + msg + '</p>'; }
+
+    log('1) ✅ El JavaScript SÍ se ejecuta en tu navegador', 'ok');
+    log('2) Librería Supabase: ' + (window.supabase ? '✅ cargó bien' : '❌ NO cargó (bloqueada)'), window.supabase ? 'ok' : 'bad');
+
+    var URL = 'https://psytkytuajrxtizynydf.supabase.co';
+    var KEY = 'sb_publishable_fgkruuGxn-lB7Hm_z4EOzg_-J-Qr15F';
+
+    (async function(){
+      try {
+        var r = await fetch(URL + '/auth/v1/token?grant_type=password', {
+          method: 'POST',
+          headers: { apikey: KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: 'ecocoffieplanet@gmail.com', password: 'Ecocoffie2026' })
+        });
+        if (r.status === 200) {
+          log('3) ✅ LOGIN FUNCIONA (status 200) — el problema NO es tu cuenta', 'ok');
+          log('4) 🎉 Todo funciona en tu navegador. El panel debería abrir.', 'ok');
+        } else {
+          var j = await r.json();
+          log('3) ❌ Login falló (status ' + r.status + '): ' + JSON.stringify(j), 'bad');
+        }
+      } catch (e) {
+        log('❌ Error de conexión: ' + e.message, 'bad');
+      }
+    })();
+  </script>
+</body>
+</html>
