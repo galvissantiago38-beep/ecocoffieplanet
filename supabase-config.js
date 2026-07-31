@@ -21,3 +21,7 @@ const SUPABASE_ANON_KEY = "sb_publishable_fgkruuGxn-lB7Hm_z4EOzg_-J-Qr15F";
 window.sb = (window.supabase && !SUPABASE_URL.includes("TU-PROYECTO"))
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
+
+// También los dejamos disponibles para el panel admin
+window.SUPABASE_URL = SUPABASE_URL;
+window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
