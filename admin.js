@@ -8,7 +8,7 @@
    la dan las políticas (RLS) de la base de datos.
    ============================================================ */
 
-document.addEventListener('DOMContentLoaded', () => {
+const __startAdmin = () => {
   const $ = (s) => document.querySelector(s);
 
   const SB_URL = window.SUPABASE_URL;
@@ -270,4 +270,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   init();
-});
+};
+
+// Ejecuta el panel aunque la página ya haya terminado de cargar
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', __startAdmin);
+else __startAdmin();
