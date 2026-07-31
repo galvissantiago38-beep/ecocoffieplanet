@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <!--
   ============================================================
-  ECOCOFFIEPLANET · Panel de administrador
-  Acceso independiente protegido con Supabase Auth.
-  Solo usuarios con rol 'admin' pueden usar las funciones.
+  ECOCOFFIEPLANET · Panel de administrador (autocontenido)
+  Todo el código va DENTRO de este archivo para evitar
+  problemas de caché con archivos externos.
   ============================================================
 -->
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="robots" content="noindex" /> <!-- que Google NO indexe el panel -->
+  <meta name="robots" content="noindex" />
   <title>Administrador · ECOCOFFIEPLANET</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔒</text></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -52,7 +52,6 @@
 
   <!-- ============ VISTA 2: PANEL ============ -->
   <section class="admin-wrap" id="panel-view" hidden>
-
     <div class="admin-top">
       <div>
         <h1>Administración de productos</h1>
@@ -64,7 +63,6 @@
       </div>
     </div>
 
-    <!-- Formulario para agregar / editar -->
     <div class="admin-card" style="margin-bottom:1.5rem;">
       <h3 id="form-title" style="margin-bottom:1.2rem;">Agregar producto</h3>
       <form id="product-form" novalidate>
@@ -102,7 +100,6 @@
       </form>
     </div>
 
-    <!-- Lista de productos con reacciones -->
     <div class="admin-card">
       <div class="admin-tools">
         <h3>Productos y reacciones</h3>
@@ -117,9 +114,7 @@
       <div class="admin-table-wrap">
         <table class="admin-table">
           <thead>
-            <tr>
-              <th></th><th>Producto</th><th>Precio</th><th>Reacciones</th><th>Total</th><th>Acciones</th>
-            </tr>
+            <tr><th></th><th>Producto</th><th>Precio</th><th>Reacciones</th><th>Total</th><th>Acciones</th></tr>
           </thead>
           <tbody id="product-table-body">
             <tr><td colspan="6" style="text-align:center;color:var(--text-soft);">Cargando…</td></tr>
@@ -129,9 +124,218 @@
     </div>
   </section>
 
-  <!-- Scripts: librería + conexión + lógica del panel -->
+  <!-- Librería de Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-config.js?v=6"></script>
-  <script src="admin.js?v=6"></script>
+
+  <!-- ============ TODO EL CÓDIGO DEL PANEL (dentro del HTML) ============ -->
+  <script>
+  (function () {
+    var $ = function (s) { return document.querySelector(s); };
+
+    // Datos de conexión (la llave publishable es pública y segura)
+    var SB_URL = 'https://psytkytuajrxtizynydf.supabase.co';
+    var SB_KEY = 'sb_publishable_fgkruuGxn-lB7Hm_z4EOzg_-J-Qr15F';
+
+    var loginView = $('#login-view'), panelView = $('#panel-view');
+    var loginForm = $('#login-form'), loginMsg = $('#login-msg');
+    var logoutBtn = $('#logout-btn'), adminEmail = $('#admin-email');
+    var productForm = $('#product-form'), formTitle = $('#form-title'), formMsg = $('#form-msg');
+    var cancelEditBtn = $('#cancel-edit'), saveBtn = $('#save-btn');
+    var fNombre = $('#p-nombre'), fPrecio = $('#p-precio'), fDesc = $('#p-desc');
+    var fEtiqueta = $('#p-etiqueta'), fImagen = $('#p-imagen'), fFile = $('#p-file');
+    var tableBody = $('#product-table-body'), sortSelect = $('#sort-select');
+
+    var sbAdmin = null, productos = [], editId = null;
+
+    var showFatal = function (m) { loginMsg.textContent = '⚠️ ' + m; loginMsg.className = 'msg err'; };
+    window.addEventListener('error', function (e) { showFatal(e.message || 'Error'); });
+    window.addEventListener('unhandledrejection', function (e) { showFatal((e.reason && e.reason.message) || 'Error de conexión'); });
+
+    var guardarTokens = function (j) {
+      localStorage.setItem('eco-admin-token', j.access_token);
+      if (j.refresh_token) localStorage.setItem('eco-admin-refresh', j.refresh_token);
+    };
+    var limpiarTokens = function () {
+      localStorage.removeItem('eco-admin-token');
+      localStorage.removeItem('eco-admin-refresh');
+      localStorage.removeItem('eco-admin-email');
+    };
+    var clienteConToken = function (token) {
+      return window.supabase.createClient(SB_URL, SB_KEY, { accessToken: function () { return Promise.resolve(token); } });
+    };
+
+    var iniciarSesion = async function (email, password) {
+      var ctrl = new AbortController();
+      var t = setTimeout(function () { ctrl.abort(); }, 15000);
+      try {
+        var r = await fetch(SB_URL + '/auth/v1/token?grant_type=password', {
+          method: 'POST', signal: ctrl.signal,
+          headers: { apikey: SB_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, password: password })
+        });
+        var j = await r.json();
+        if (r.status !== 200) throw new Error('Correo o contraseña incorrectos.');
+        return j;
+      } catch (e) {
+        if (e.name === 'AbortError') throw new Error('El servidor tardó demasiado. Revisa tu internet.');
+        throw e;
+      } finally { clearTimeout(t); }
+    };
+    var renovarToken = async function () {
+      var rt = localStorage.getItem('eco-admin-refresh');
+      if (!rt) return null;
+      try {
+        var r = await fetch(SB_URL + '/auth/v1/token?grant_type=refresh_token', {
+          method: 'POST', headers: { apikey: SB_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh_token: rt })
+        });
+        if (r.status !== 200) return null;
+        var j = await r.json(); guardarTokens(j); return j.access_token;
+      } catch (e) { return null; }
+    };
+    var esAdmin = async function (cli) {
+      var res = await cli.rpc('es_admin');
+      return !res.error && res.data === true;
+    };
+
+    var mostrarLogin = function () { panelView.hidden = true; loginView.hidden = false; };
+    var mostrarPanel = function () {
+      loginView.hidden = true; panelView.hidden = false;
+      adminEmail.textContent = localStorage.getItem('eco-admin-email') || '';
+      cargarProductos();
+    };
+
+    var init = async function () {
+      var token = localStorage.getItem('eco-admin-token');
+      if (token) {
+        sbAdmin = clienteConToken(token);
+        if (await esAdmin(sbAdmin)) return mostrarPanel();
+        token = await renovarToken();
+        if (token) { sbAdmin = clienteConToken(token); if (await esAdmin(sbAdmin)) return mostrarPanel(); }
+        limpiarTokens();
+      }
+      mostrarLogin();
+    };
+
+    loginForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      loginMsg.textContent = 'Ingresando…'; loginMsg.className = 'msg';
+      var email = loginForm.email.value.trim(), password = loginForm.password.value;
+      if (!email || !password) { loginMsg.textContent = 'Escribe correo y contraseña.'; loginMsg.className = 'msg err'; return; }
+      try {
+        var sesion = await iniciarSesion(email, password);
+        var cli = clienteConToken(sesion.access_token);
+        if (!(await esAdmin(cli))) { loginMsg.textContent = 'Esta cuenta no es administrador.'; loginMsg.className = 'msg err'; return; }
+        guardarTokens(sesion);
+        localStorage.setItem('eco-admin-email', email);
+        sbAdmin = cli; loginForm.reset(); loginMsg.textContent = '';
+        mostrarPanel();
+      } catch (err) { loginMsg.textContent = err.message; loginMsg.className = 'msg err'; }
+    });
+
+    logoutBtn.addEventListener('click', function () { limpiarTokens(); sbAdmin = null; mostrarLogin(); });
+
+    var formatPrecio = function (v) { return (!v || v <= 0) ? '$0' : '$' + Number(v).toLocaleString('es-CO'); };
+    var escapeHtml = function (str) {
+      return String(str || '').replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    };
+
+    var cargarProductos = async function () {
+      tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-soft);">Cargando…</td></tr>';
+      var pr = await sbAdmin.from('productos').select('*');
+      var co = await sbAdmin.rpc('conteo_reacciones');
+      if (pr.error) { tableBody.innerHTML = '<tr><td colspan="6" style="color:#d9534f;">Error: ' + pr.error.message + '</td></tr>'; return; }
+      var cmap = {}; (co.data || []).forEach(function (c) { cmap[c.producto_id] = c; });
+      productos = (pr.data || []).map(function (p) {
+        var c = cmap[p.id] || { likes: 0, loves: 0, dislikes: 0, total: 0 };
+        return Object.assign({}, p, { likes: +c.likes || 0, loves: +c.loves || 0, dislikes: +c.dislikes || 0, total: +c.total || 0 });
+      });
+      renderTabla();
+    };
+
+    var renderTabla = function () {
+      var orden = sortSelect.value;
+      var lista = productos.slice().sort(function (a, b) {
+        return orden === 'reacciones' ? b.total - a.total : new Date(b.creado_en) - new Date(a.creado_en);
+      });
+      if (!lista.length) {
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-soft);">No hay productos. Agrega el primero arriba. ☕</td></tr>';
+        return;
+      }
+      tableBody.innerHTML = lista.map(function (p) {
+        return '<tr>' +
+          '<td><img class="admin-thumb" src="' + (p.imagen || '') + '" alt="" onerror="this.style.visibility=\'hidden\'"/></td>' +
+          '<td><b>' + escapeHtml(p.nombre) + '</b>' + (p.etiqueta ? '<br><small style="color:var(--accent)">' + escapeHtml(p.etiqueta) + '</small>' : '') + '</td>' +
+          '<td>' + formatPrecio(p.precio) + '</td>' +
+          '<td><span class="rcount">👍 <b>' + p.likes + '</b></span><span class="rcount">❤️ <b>' + p.loves + '</b></span><span class="rcount">👎 <b>' + p.dislikes + '</b></span></td>' +
+          '<td><b>' + p.total + '</b></td>' +
+          '<td><div class="admin-row-actions"><button class="btn-icon" data-edit="' + p.id + '">✏️ Editar</button><button class="btn-icon danger" data-del="' + p.id + '">🗑️ Borrar</button></div></td>' +
+          '</tr>';
+      }).join('');
+      tableBody.querySelectorAll('[data-edit]').forEach(function (b) { b.addEventListener('click', function () { empezarEdicion(b.dataset.edit); }); });
+      tableBody.querySelectorAll('[data-del]').forEach(function (b) { b.addEventListener('click', function () { borrarProducto(b.dataset.del); }); });
+    };
+    sortSelect.addEventListener('change', renderTabla);
+
+    productForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      formMsg.textContent = ''; formMsg.className = 'msg';
+      var nombre = fNombre.value.trim();
+      if (nombre.length < 2) { formMsg.textContent = 'El nombre es obligatorio.'; formMsg.className = 'msg err'; fNombre.focus(); return; }
+      var precio = Math.max(0, parseInt(fPrecio.value, 10) || 0);
+      saveBtn.disabled = true; saveBtn.textContent = 'Guardando…';
+      try {
+        var imagen = fImagen.value.trim();
+        if (fFile.files && fFile.files[0]) {
+          var file = fFile.files[0];
+          var ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+          var ruta = Date.now() + '-' + Math.round(Math.random() * 1e6) + '.' + ext;
+          var up = await sbAdmin.storage.from('productos').upload(ruta, file, { upsert: false });
+          if (up.error) throw new Error('No se pudo subir la imagen: ' + up.error.message);
+          imagen = sbAdmin.storage.from('productos').getPublicUrl(ruta).data.publicUrl;
+        }
+        var datos = { nombre: nombre, descripcion: fDesc.value.trim(), precio: precio, etiqueta: fEtiqueta.value.trim() };
+        if (imagen) datos.imagen = imagen;
+        var res = editId ? await sbAdmin.from('productos').update(datos).eq('id', editId)
+                         : await sbAdmin.from('productos').insert(datos);
+        if (res.error) throw new Error(res.error.message);
+        formMsg.textContent = editId ? '✅ Producto actualizado.' : '✅ Producto agregado.';
+        formMsg.className = 'msg ok';
+        resetForm(); cargarProductos();
+      } catch (err) {
+        formMsg.textContent = '⚠️ ' + err.message; formMsg.className = 'msg err';
+      } finally { saveBtn.disabled = false; saveBtn.textContent = 'Guardar producto'; }
+    });
+
+    var empezarEdicion = function (id) {
+      var p = productos.find(function (x) { return x.id === id; });
+      if (!p) return;
+      editId = id;
+      fNombre.value = p.nombre || ''; fPrecio.value = p.precio || 0; fDesc.value = p.descripcion || '';
+      fEtiqueta.value = p.etiqueta || ''; fImagen.value = p.imagen || ''; fFile.value = '';
+      formTitle.textContent = 'Editar producto'; saveBtn.textContent = 'Guardar cambios'; cancelEditBtn.hidden = false;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    cancelEditBtn.addEventListener('click', resetForm);
+    function resetForm() {
+      editId = null; productForm.reset(); fPrecio.value = 0;
+      formTitle.textContent = 'Agregar producto'; saveBtn.textContent = 'Guardar producto'; cancelEditBtn.hidden = true;
+    }
+    var borrarProducto = async function (id) {
+      var p = productos.find(function (x) { return x.id === id; });
+      if (!confirm('¿Eliminar "' + (p ? p.nombre : 'este producto') + '"? No se puede deshacer.')) return;
+      var res = await sbAdmin.from('productos').delete().eq('id', id);
+      if (res.error) { alert('No se pudo eliminar: ' + res.error.message); return; }
+      if (editId === id) resetForm();
+      cargarProductos();
+    };
+
+    // Arranca
+    if (!window.supabase) { showFatal('No cargó la librería de Supabase. Revisa tu internet.'); return; }
+    init();
+  })();
+  </script>
 </body>
 </html>
