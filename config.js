@@ -27,7 +27,7 @@ const CONFIG = {
 
   /* ---- IMÁGENES DE LAS SECCIONES ---- */
   imagenes: {
-    historia:    "https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=900&q=80", // granos de café
+    historia:    "https://images.unsplash.com/photo-1646346835113-b83a4097983b?auto=format&fit=crop&w=900&q=80", // café molido
     inspiracion: "https://images.unsplash.com/photo-1524350876685-274059332603?auto=format&fit=crop&w=900&q=80", // cultivo de café
     porque:      "https://images.unsplash.com/photo-1515442261605-65987783cb6a?auto=format&fit=crop&w=900&q=80", // cuncho / café molido
   },
