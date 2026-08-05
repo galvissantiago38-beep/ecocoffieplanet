@@ -23,7 +23,7 @@ const CONFIG = {
         1. Guarda tu imagen en la carpeta "img/" (por ejemplo: img/portada.jpg)
         2. Cambia la línea de abajo por:   heroImagen: "img/portada.jpg",
      Mientras tanto queda esta foto de skincare como ejemplo. */
-  heroImagen: "img/portada.png",
+  heroImagen: "img/portada.jpg",
 
   /* ---- IMÁGENES DE LAS SECCIONES ---- */
   imagenes: {
