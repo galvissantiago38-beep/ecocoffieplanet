@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Plantilla de tarjeta. "conReacciones" añade los botones 👍 ❤️ 👎
   const cardHTML = (p, conReacciones) => `
     <article class="product-card reveal" data-product="${p.id || ''}">
-      <div class="product-card__img">
+      <div class="product-card__img" ${p.id ? `data-ver="${p.id}"` : ''}>
         <img src="${p.imagen}" alt="${p.nombre}" loading="lazy" />
         ${p.etiqueta ? `<span class="product-card__tag">${p.etiqueta}</span>` : ''}
       </div>
@@ -68,7 +68,10 @@ document.addEventListener('DOMContentLoaded', () => {
         <p>${p.descripcion || ''}</p>
         <div class="product-card__foot">
           <span class="price">${formatPrice(p.precio)}</span>
-          <button class="btn btn--sm btn--primary">Ver más</button>
+          <div class="btns">
+            <button class="btn btn--sm btn--ghost" ${p.id ? `data-ver="${p.id}"` : ''}>Ver más</button>
+            <button class="btn btn--sm btn--primary" ${p.id ? `data-add="${p.id}"` : ''}>Agregar</button>
+          </div>
         </div>
         ${conReacciones ? `
         <div class="reactions" data-product="${p.id}">
@@ -151,6 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const conReacciones = !!productos;             // solo hay reacciones si vienen de la base de datos
     if (!productos) productos = CONFIG.productos;   // respaldo: nada se rompe sin Supabase
 
+    productosActuales = productos;
     productsGrid.innerHTML = productos.map(p => cardHTML(p, conReacciones)).join('');
     productsGrid.querySelectorAll('.reveal').forEach((el, i) => {
       el.style.setProperty('--d', `${i * 0.07}s`);
@@ -158,8 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (conReacciones) {
-      productsGrid.querySelectorAll('.reaction').forEach(btn =>
-        btn.addEventListener('click', () => onReaccion(btn)));
+      wireReactions(productsGrid);
       await cargarConteos();
       await cargarMiReaccion();
       // Tiempo real: si otra persona reacciona, los números se actualizan solos
@@ -168,6 +171,172 @@ document.addEventListener('DOMContentLoaded', () => {
         .subscribe();
     }
   };
+
+  /* ===================== CARRITO · VENTANA · CHECKOUT ===================== */
+  let productosActuales = [];
+  const getProd = (id) => productosActuales.find(p => String(p.id) === String(id));
+  const wireReactions = (container) => {
+    container.querySelectorAll('.reaction').forEach(btn => btn.addEventListener('click', () => onReaccion(btn)));
+  };
+  const precioLabel = (v) => (v && v > 0) ? '$' + Number(v).toLocaleString('es-CO') : 'A convenir';
+
+  // ----- Notificaciones (toasts) -----
+  const toastWrap = document.getElementById('toast-wrap');
+  const showToast = (msg) => {
+    if (!toastWrap) return;
+    const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+    toastWrap.appendChild(t);
+    setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 300); }, 2400);
+  };
+
+  // ----- Elementos del carrito / ventana -----
+  const overlay = document.getElementById('overlay');
+  const cartEl = document.getElementById('cart');
+  const cartItemsEl = document.getElementById('cart-items');
+  const cartTotalEl = document.getElementById('cart-total');
+  const cartBadge = document.getElementById('cart-badge');
+  const modal = document.getElementById('product-modal');
+
+  // ----- Estado del carrito (guardado en el navegador) -----
+  const loadCart = () => { try { return JSON.parse(localStorage.getItem('eco-cart')) || []; } catch { return []; } };
+  const saveCart = () => localStorage.setItem('eco-cart', JSON.stringify(cart));
+  let cart = loadCart();
+  const cartTotal = () => cart.reduce((s, i) => s + (i.precio || 0) * i.cantidad, 0);
+  const cartCount = () => cart.reduce((s, i) => s + i.cantidad, 0);
+
+  const updateBadge = () => {
+    if (!cartBadge) return;
+    const n = cartCount();
+    cartBadge.textContent = n;
+    cartBadge.hidden = n === 0;
+  };
+
+  const renderCart = () => {
+    if (!cartItemsEl) return;
+    if (!cart.length) {
+      cartItemsEl.innerHTML = '<p class="cart__empty">Tu carrito está vacío.<br>Agrega productos ☕</p>';
+    } else {
+      cartItemsEl.innerHTML = cart.map(i => `
+        <div class="cart-item" data-id="${i.id}">
+          <img class="cart-item__img" src="${i.imagen}" alt="${i.nombre}" />
+          <div>
+            <div class="cart-item__name">${i.nombre}</div>
+            <div class="cart-item__price">${precioLabel(i.precio)}</div>
+            <div class="cart-item__qty">
+              <button data-menos="${i.id}" aria-label="Menos">−</button>
+              <span>${i.cantidad}</span>
+              <button data-mas="${i.id}" aria-label="Más">+</button>
+            </div>
+          </div>
+          <button class="cart-item__del" data-del="${i.id}" aria-label="Quitar">🗑️</button>
+        </div>`).join('');
+    }
+    const total = cartTotal();
+    if (cartTotalEl) cartTotalEl.textContent = total > 0 ? '$' + total.toLocaleString('es-CO') : 'A convenir';
+    updateBadge();
+  };
+
+  const addToCart = (prod) => {
+    if (!prod) return;
+    const ex = cart.find(i => i.id === prod.id);
+    if (ex) ex.cantidad++;
+    else cart.push({ id: prod.id, nombre: prod.nombre, precio: prod.precio || 0, imagen: prod.imagen, cantidad: 1 });
+    saveCart(); renderCart(); showToast('Agregado al carrito ✓');
+  };
+  const changeQty = (id, delta) => {
+    const it = cart.find(i => i.id === id); if (!it) return;
+    it.cantidad += delta;
+    if (it.cantidad <= 0) cart = cart.filter(i => i.id !== id);
+    saveCart(); renderCart();
+  };
+  const removeItem = (id) => { cart = cart.filter(i => i.id !== id); saveCart(); renderCart(); };
+
+  // ----- Abrir / cerrar overlay, carrito y ventana -----
+  function cerrarOverlaySiLibre() {
+    const abierto = (cartEl && cartEl.classList.contains('open')) || (modal && !modal.hidden);
+    if (!abierto && overlay) { overlay.classList.remove('show'); setTimeout(() => { overlay.hidden = true; }, 300); }
+  }
+  const abrirOverlay = () => { if (!overlay) return; overlay.hidden = false; requestAnimationFrame(() => overlay.classList.add('show')); };
+  const openCart = () => { renderCart(); if (cartEl) cartEl.classList.add('open'); abrirOverlay(); };
+  const closeCart = () => { if (cartEl) cartEl.classList.remove('open'); cerrarOverlaySiLibre(); };
+  const closeModal = () => { if (modal) modal.hidden = true; cerrarOverlaySiLibre(); };
+
+  const openModal = (prod) => {
+    if (!prod || !modal) return;
+    document.getElementById('m-img').src = prod.imagen;
+    document.getElementById('m-img').alt = prod.nombre;
+    document.getElementById('m-nombre').textContent = prod.nombre;
+    document.getElementById('m-precio').textContent = precioLabel(prod.precio);
+    document.getElementById('m-desc').textContent = prod.descripcion || '';
+    const tag = document.getElementById('m-tag');
+    if (prod.etiqueta) { tag.textContent = prod.etiqueta; tag.hidden = false; } else { tag.hidden = true; }
+    // Reacciones dentro de la ventana
+    const rc = document.getElementById('m-reactions');
+    rc.innerHTML = window.sb ? `
+      <div class="reactions" data-product="${prod.id}">
+        <button class="reaction" data-tipo="like"><span>👍</span><b class="rc like">0</b></button>
+        <button class="reaction" data-tipo="love"><span>❤️</span><b class="rc love">0</b></button>
+        <button class="reaction" data-tipo="dislike"><span>👎</span><b class="rc dislike">0</b></button>
+      </div>` : '';
+    if (window.sb) { wireReactions(rc); cargarConteos(); cargarMiReaccion(); }
+    document.getElementById('m-add').onclick = () => { addToCart(prod); closeModal(); };
+    modal.hidden = false; abrirOverlay();
+  };
+
+  // ----- Conexiones de eventos -----
+  if (productsGrid) productsGrid.addEventListener('click', (e) => {
+    const add = e.target.closest('[data-add]');
+    const ver = e.target.closest('[data-ver]');
+    if (add) { e.preventDefault(); addToCart(getProd(add.dataset.add)); }
+    else if (ver) { openModal(getProd(ver.dataset.ver)); }
+  });
+  if (cartItemsEl) cartItemsEl.addEventListener('click', (e) => {
+    const mas = e.target.closest('[data-mas]'), menos = e.target.closest('[data-menos]'), del = e.target.closest('[data-del]');
+    if (mas) changeQty(mas.dataset.mas, 1);
+    else if (menos) changeQty(menos.dataset.menos, -1);
+    else if (del) removeItem(del.dataset.del);
+  });
+  document.getElementById('cart-btn') && document.getElementById('cart-btn').addEventListener('click', openCart);
+  document.getElementById('cart-close') && document.getElementById('cart-close').addEventListener('click', closeCart);
+  document.getElementById('modal-close') && document.getElementById('modal-close').addEventListener('click', closeModal);
+  if (overlay) overlay.addEventListener('click', () => { closeCart(); closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeCart(); closeModal(); } });
+
+  // ----- Checkout: guarda el pedido y abre WhatsApp -----
+  const checkoutForm = document.getElementById('checkout-form');
+  const cartMsg = document.getElementById('cart-msg');
+  if (checkoutForm) checkoutForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const nombre = document.getElementById('c-nombre').value.trim();
+    const tel = document.getElementById('c-tel').value.trim();
+    cartMsg.className = 'cart__msg';
+    if (!cart.length) { cartMsg.textContent = 'Tu carrito está vacío.'; cartMsg.classList.add('err'); return; }
+    if (nombre.length < 2) { cartMsg.textContent = 'Escribe tu nombre para el pedido.'; cartMsg.classList.add('err'); return; }
+
+    const items = cart.map(i => ({ producto_id: i.id, nombre: i.nombre, precio: i.precio, cantidad: i.cantidad }));
+    const total = cartTotal();
+
+    // Guardar el pedido en la base de datos (si Supabase está conectado)
+    if (window.sb) {
+      try { await window.sb.from('pedidos').insert({ cliente_nombre: nombre, cliente_telefono: tel, items, total }); }
+      catch (err) { console.warn('Pedido:', err.message); }
+    }
+
+    // Armar el mensaje de WhatsApp
+    let texto = `¡Hola ECOCOFFIEPLANET! 🌿 Soy ${nombre} y quiero hacer un pedido:\n\n`;
+    cart.forEach(i => { texto += `• ${i.cantidad}x ${i.nombre} (${precioLabel(i.precio)})\n`; });
+    texto += `\nTotal: ${total > 0 ? '$' + total.toLocaleString('es-CO') : 'A convenir'}`;
+    if (tel) texto += `\nMi WhatsApp: ${tel}`;
+    window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(texto)}`, '_blank');
+
+    // Vaciar carrito
+    cart = []; saveCart(); renderCart(); checkoutForm.reset();
+    cartMsg.textContent = '¡Pedido enviado! Te llevamos a WhatsApp ✓'; cartMsg.classList.add('ok');
+    showToast('Pedido realizado 🎉');
+    setTimeout(closeCart, 1600);
+  });
+
+  updateBadge(); // muestra el contador si ya había productos guardados
   initProductos();
 
   // Generar GALERÍA

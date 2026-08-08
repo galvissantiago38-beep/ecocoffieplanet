@@ -83,6 +83,11 @@ const CONFIG = {
     "https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=600&q=80",
   ],
 
+  /* ---- WhatsApp para recibir pedidos ----
+     Formato internacional SIN "+" ni espacios. Colombia = 57 + número.
+     👉 Cambia este por tu número real para recibir los pedidos. */
+  whatsapp: "573000000000",
+
   /* ---- ¿Cómo mostrar el precio 0? ----
      "$0"          → muestra el número cero
      "Próximamente"→ muestra ese texto en vez del precio

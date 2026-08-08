@@ -124,6 +124,24 @@
         </table>
       </div>
     </div>
+
+    <!-- PEDIDOS -->
+    <div class="admin-card" style="margin-top:1.5rem;">
+      <div class="admin-tools">
+        <h3>🛒 Pedidos recibidos</h3>
+        <button class="btn-icon" id="reload-pedidos">↻ Actualizar</button>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr><th>Fecha</th><th>Cliente</th><th>Productos</th><th>Total</th><th>Estado</th><th></th></tr>
+          </thead>
+          <tbody id="pedidos-table-body">
+            <tr><td colspan="6" style="text-align:center;color:var(--text-soft);">Cargando…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </section>
 
   <!-- Librería de Supabase -->
@@ -205,6 +223,7 @@
       loginView.hidden = true; panelView.hidden = false;
       adminEmail.textContent = localStorage.getItem('eco-admin-email') || '';
       cargarProductos();
+      cargarPedidos();
     };
 
     var init = async function () {
@@ -333,6 +352,42 @@
       if (editId === id) resetForm();
       cargarProductos();
     };
+
+    // ---- PEDIDOS ----
+    var pedidosBody = $('#pedidos-table-body');
+    var cargarPedidos = async function () {
+      pedidosBody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-soft);">Cargando…</td></tr>';
+      var res = await sbAdmin.from('pedidos').select('*').order('creado_en', { ascending: false });
+      if (res.error) { pedidosBody.innerHTML = '<tr><td colspan="6" style="color:#d9534f;">Error: ' + res.error.message + '</td></tr>'; return; }
+      var pedidos = res.data || [];
+      if (!pedidos.length) {
+        pedidosBody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-soft);">Aún no hay pedidos. 📭</td></tr>';
+        return;
+      }
+      pedidosBody.innerHTML = pedidos.map(function (o) {
+        var fecha = new Date(o.creado_en).toLocaleString('es-CO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+        var items = (o.items || []).map(function (i) { return i.cantidad + 'x ' + escapeHtml(i.nombre); }).join(', ');
+        var total = o.total > 0 ? '$' + Number(o.total).toLocaleString('es-CO') : 'A convenir';
+        var atendido = o.estado === 'atendido';
+        return '<tr style="' + (atendido ? 'opacity:.55;' : '') + '">' +
+          '<td>' + fecha + '</td>' +
+          '<td><b>' + escapeHtml(o.cliente_nombre) + '</b>' + (o.cliente_telefono ? '<br><small>' + escapeHtml(o.cliente_telefono) + '</small>' : '') + '</td>' +
+          '<td style="max-width:260px;">' + items + '</td>' +
+          '<td>' + total + '</td>' +
+          '<td>' + (atendido ? '✅ Atendido' : '🟡 Nuevo') + '</td>' +
+          '<td>' + (atendido ? '' : '<button class="btn-icon" data-atender="' + o.id + '">Marcar atendido</button>') + '</td>' +
+          '</tr>';
+      }).join('');
+      pedidosBody.querySelectorAll('[data-atender]').forEach(function (b) {
+        b.addEventListener('click', function () { marcarAtendido(b.dataset.atender); });
+      });
+    };
+    var marcarAtendido = async function (id) {
+      var res = await sbAdmin.from('pedidos').update({ estado: 'atendido' }).eq('id', id);
+      if (res.error) { alert('No se pudo actualizar: ' + res.error.message); return; }
+      cargarPedidos();
+    };
+    $('#reload-pedidos').addEventListener('click', cargarPedidos);
 
     // Arranca
     if (!window.supabase) { showFatal('No cargó la librería de Supabase. Revisa tu internet.'); return; }
